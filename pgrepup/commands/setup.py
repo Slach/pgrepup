@@ -25,7 +25,6 @@ from .check import checks
 
 @dispatch.on('setup')
 def setup(**kwargs):
-
     result = True
     if check_destination_subscriptions():
         result = False
@@ -112,13 +111,15 @@ def _setup_source(conn, pg_pass):
 
     pg_dumpall_schema = "%s/pg_dumpall_schema_%s.sql" % (get_tmp_folder(), uuid.uuid4().hex)
     output_cli_message("Dump globals and schema of all databases")
-    pg_dumpall_schema_result = \
-        os.system('sh -c "PGPASSFILE=%(pgpass)s pg_dumpall -U %(user)s -h %(host)s -p%(port)s -s -f %(fname)s ' +
-                  '--if-exists -c"' %
-                  merge_two_dicts(
-                      get_connection_params('Source'),
-                      {"fname": pg_dumpall_schema, "pgpass": pg_pass}
-                  ))
+    sh_cmd = 'PGPASSFILE=%(pgpass)s pg_dumpall -U %(user)s -h %(host)s -p%(port)s -s -f %(fname)s --if-exists -c'
+    sh_cmd = sh_cmd % (
+        merge_two_dicts(
+            get_connection_params('Source'),
+            {"fname": pg_dumpall_schema, "pgpass": pg_pass}
+        )
+    )
+    sh_cmd = 'sh -c "%(sh_cmd)s"' % {'sh_cmd': sh_cmd}
+    pg_dumpall_schema_result = os.system(sh_cmd)
     result['result'] = result['result'] and pg_dumpall_schema_result == 0
     print(output_cli_result(result['result']))
 
@@ -158,14 +159,13 @@ def _setup_destination(conn, pg_pass, source_setup_results):
     result = {'result': True}
     output_cli_message("Create and import source globals and schema")
     if 'pg_dumpall' in source_setup_results:
-        restore_schema_result = \
-            os.system(
-                'sh -c "PGPASSFILE=%(pgpass)s psql -U %(user)s -h %(host)s -p%(port)s -f %(fname)s -d postgres ' +
-                '>/dev/null 2>&1"'
-                % merge_two_dicts(
-                    get_connection_params('Destination'),
-                    {"fname": source_setup_results['pg_dumpall'], "pgpass": pg_pass}
-                ))
+        sh_cmd = 'PGPASSFILE=%(pgpass)s psql -U %(user)s -h %(host)s -p%(port)s -f %(fname)s -d postgres >/dev/null 2>&1'
+        sh_cmd = sh_cmd % merge_two_dicts(
+            get_connection_params('Destination'),
+            {"fname": source_setup_results['pg_dumpall'], "pgpass": pg_pass}
+        )
+        sh_cmd = 'sh -c "%(sh_cmd)s"' % {'sh_cmd': sh_cmd}
+        restore_schema_result = os.system(sh_cmd)
 
         result['result'] = result['result'] and restore_schema_result == 0
         print(output_cli_result(restore_schema_result == 0))
