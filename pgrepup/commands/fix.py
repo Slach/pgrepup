@@ -21,7 +21,7 @@ from clint.textui import colored, indent
 
 
 @dispatch.on('fix')
-def fix():
+def fix(**kwargs):
 
     # Shortcut to ask master password before output Configuration message
     decrypt(config().get('Source', 'password'))

@@ -21,7 +21,7 @@ from ..helpers.ui import *
 
 
 @dispatch.on('stop')
-def stop():
+def stop(**kwargs):
 
     # Shortcut to ask master password before output Configuration message
     decrypt(config().get('Source', 'password'))

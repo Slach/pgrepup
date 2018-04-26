@@ -22,7 +22,7 @@ from .stop import stop
 
 
 @dispatch.on('uninstall')
-def uninstall():
+def uninstall(**kwargs):
     stop()
 
     output_cli_message("Uninstall operations", color='cyan')

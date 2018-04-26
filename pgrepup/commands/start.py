@@ -22,7 +22,7 @@ from ..helpers.database import *
 
 
 @dispatch.on('start')
-def start():
+def start(**kwargs):
 
     # Shortcut to ask master password before output Configuration message
     decrypt(config().get('Source', 'password'))

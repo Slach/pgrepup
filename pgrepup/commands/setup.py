@@ -24,7 +24,7 @@ from .check import checks
 
 
 @dispatch.on('setup')
-def setup():
+def setup(**kwargs):
 
     result = True
     if check_destination_subscriptions():

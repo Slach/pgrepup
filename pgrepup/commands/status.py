@@ -24,7 +24,7 @@ from ..helpers.crypt import decrypt
 
 
 @dispatch.on('status')
-def status():
+def status(**kwargs):
     targets = ['Source', 'Destination']
 
     # Shortcut to ask master password before output Configuration message
